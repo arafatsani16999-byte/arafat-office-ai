@@ -1,7 +1,7 @@
 // ================= CONFIG =================
 const ADMIN_EMAIL = "arafatsani16999@gmail.com";
 const ADMIN_PASS  = "arafat123";
-const PERMANENT_KEY = "premium123";
+const PERMANENT_KEY = "1234";
 const FREE_LIMIT = 6;
 
 // ================= STATE =================
@@ -15,34 +15,23 @@ function showScreen(id){
   document.getElementById(id).classList.add("active");
 }
 
-// ================= LOGIN =================
+// ================= LOGIN (শুধু Admin Gmail) =================
 function doLogin(){
   const email = document.getElementById("loginEmail").value.trim();
   const msg   = document.getElementById("loginMsg");
   
-  // শুধু Gmail দিলেই Login হবে
   if(email === ADMIN_EMAIL){
     currentUser = { email, role:"admin", premium:true };
     localStorage.setItem("aoa_user", JSON.stringify(currentUser));
     enterApp();
-  } 
-  // অথবা কোনো Gmail দিলে Guest হিসাবে ঢুকবে
-  else if(email.includes("@gmail.com")){
-    currentUser = { email, role:"guest", premium:false };
-    localStorage.setItem("aoa_user", JSON.stringify(currentUser));
-    enterApp();
+  } else {
+    msg.textContent = "❌ শুধু Admin Gmail দিয়ে Login করা যাবে";
   }
-  // না হলে Error
-  else {
-    msg.textContent = "❌ সঠিক Gmail দিন";
-  }
-                   }
+}
+
+// Guest Login বন্ধ
 function skipLogin(){
-  const guestId = localStorage.getItem("aoa_guestId") || ("guest_"+Date.now());
-  localStorage.setItem("aoa_guestId", guestId);
-  currentUser = { email:guestId, role:"guest", premium:false };
-  localStorage.setItem("aoa_user", JSON.stringify(currentUser));
-  enterApp();
+  alert("❌ Guest Login বন্ধ আছে। Admin হিসেবে Login করুন।");
 }
 
 function logout(){
@@ -53,7 +42,7 @@ function logout(){
 
 function enterApp(){
   document.getElementById("userLabel").textContent =
-    currentUser.role === "admin" ? "Admin 👑" : (currentUser.premium ? "Premium ⭐" : "Free");
+    currentUser.role === "admin" ? "Admin 👑" : "User";
   showScreen("mainApp");
   updateQuotaInfo();
   loadSavedKey();
@@ -65,8 +54,8 @@ function setUsed(n){ usage[currentUser.email] = n; localStorage.setItem("aoa_usa
 
 function updateQuotaInfo(){
   const el = document.getElementById("quotaInfo");
-  if(currentUser.premium || currentUser.role === "admin"){
-    el.textContent = "✅ Unlimited prompts (Premium)";
+  if(currentUser.role === "admin" || currentUser.premium){
+    el.textContent = "✅ Unlimited prompts (Admin)";
     el.className = "msg ok";
   } else {
     const left = FREE_LIMIT - getUsed();
@@ -136,7 +125,7 @@ async function generateCode(){
 
   saveKey(apiKey);
 
-  if(!currentUser.premium && currentUser.role !== "admin"){
+  if(currentUser.role !== "admin" && !currentUser.premium){
     if(getUsed() >= FREE_LIMIT){ alert("Free limit শেষ! Premium Unlock করুন।"); return; }
   }
 
@@ -148,7 +137,7 @@ async function generateCode(){
     else code = await callOpenAI(apiKey, promptText);
     output.textContent = code;
 
-    if(!currentUser.premium && currentUser.role !== "admin"){
+    if(currentUser.role !== "admin" && !currentUser.premium){
       setUsed(getUsed()+1);
       updateQuotaInfo();
     }
