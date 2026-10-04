@@ -1,6 +1,6 @@
 // ================= CONFIG =================
 const ADMIN_EMAIL = "arafatsani16999@gmail.com";
-const ADMIN_PASS  = "arafat01875790164@@";
+const ADMIN_PASS  = "arafat01875790164@@@@";
 const PERMANENT_KEY = "iloveyoumababaff";
 const FREE_LIMIT = 6; // Free user কতবার generate করতে পারবে
 
