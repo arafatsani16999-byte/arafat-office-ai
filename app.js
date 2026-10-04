@@ -18,17 +18,25 @@ function showScreen(id){
 // ================= LOGIN =================
 function doLogin(){
   const email = document.getElementById("loginEmail").value.trim();
-  const pass  = document.getElementById("loginPass").value;
   const msg   = document.getElementById("loginMsg");
-  if(email === ADMIN_EMAIL && pass === ADMIN_PASS){
+  
+  // শুধু Gmail দিলেই Login হবে
+  if(email === ADMIN_EMAIL){
     currentUser = { email, role:"admin", premium:true };
     localStorage.setItem("aoa_user", JSON.stringify(currentUser));
     enterApp();
-  } else {
-    msg.textContent = "❌ ভুল Email বা Password";
+  } 
+  // অথবা কোনো Gmail দিলে Guest হিসাবে ঢুকবে
+  else if(email.includes("@gmail.com")){
+    currentUser = { email, role:"guest", premium:false };
+    localStorage.setItem("aoa_user", JSON.stringify(currentUser));
+    enterApp();
   }
-}
-
+  // না হলে Error
+  else {
+    msg.textContent = "❌ সঠিক Gmail দিন";
+  }
+                   }
 function skipLogin(){
   const guestId = localStorage.getItem("aoa_guestId") || ("guest_"+Date.now());
   localStorage.setItem("aoa_guestId", guestId);
