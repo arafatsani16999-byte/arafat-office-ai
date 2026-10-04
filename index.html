@@ -14,11 +14,10 @@
   <div class="login-box">
     <h1 class="logo">ARAFAT <span>OFFICE</span> AL AI</h1>
     <p class="sub">Admin Login</p>
-    <input id="loginEmail" type="email" placeholder="Email" />
-    <input id="loginPass" type="password" placeholder="Password" />
-    <button onclick="doLogin()" class="btn primary">Login</button>
+    <input id="loginEmail" type="email" placeholder="আপনার Gmail দিন" />
+    <input id="loginPass" type="password" placeholder="Password (না দিলেও চলবে)" />
+    <button onclick="doLogin()" class="btn primary">🔓 Login</button>
     <p id="loginMsg" class="msg"></p>
-    <button onclick="skipLogin()" class="btn ghost">Guest হিসাবে ঢুকুন (Free)</button>
   </div>
 </div>
 
@@ -47,19 +46,17 @@
       </div>
       <div class="row">
         <label class="remember">
-          <input type="checkbox" id="rememberKey" checked style="width:auto;margin:0 8px 0 0;" />
+          <input type="checkbox" id="rememberKey" checked />
           <span>এই Key মনে রাখো</span>
         </label>
       </div>
-      <a href="https://aistudio.google.com/app/apikey" target="_blank" class="btn telegram" style="margin-top:10px;">
-        🔑 Free Gemini API Key নিন
-      </a>
+      <a href="https://aistudio.google.com/app/apikey" target="_blank" class="btn telegram" style="margin-top:10px;">🔑 Free Gemini API Key নিন</a>
       <p class="msg ok" id="keyStatus"></p>
     </section>
 
     <section class="prompt-card">
       <label>আপনার Prompt লিখুন 👇</label>
-      <textarea id="promptInput" placeholder="যেমন: একটি Portfolio Website বানাও যেখানে About, Skills, Contact আছে..."></textarea>
+      <textarea id="promptInput" placeholder="যেমন: একটি Portfolio Website বানাও..."></textarea>
       <button onclick="generateCode()" class="btn primary" style="margin-top:10px;">✨ Generate Website/App</button>
       <p id="quotaInfo" class="msg"></p>
     </section>
@@ -73,7 +70,7 @@
           <button onclick="previewCode()" class="btn small">Preview</button>
         </div>
       </div>
-      <pre id="codeOutput">এখানে আপনার Generated Website / App এর কোড আসবে...</pre>
+      <pre id="codeOutput">এখানে Generated Code আসবে...</pre>
     </section>
 
     <section class="actions-card">
