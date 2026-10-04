@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="theme-color" content="#0a0a0f"/>
+<title>ARAFAT OFFICE AL AI</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="stylesheet" href="style.css"/>
+<link rel="icon" href="icon-192.png"/>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="screen active">
+  <div class="login-box">
+    <h1 class="logo">ARAFAT <span>OFFICE</span> AL AI</h1>
+    <p class="sub">Admin Login</p>
+    <input id="loginEmail" type="email" placeholder="Email" />
+    <input id="loginPass" type="password" placeholder="Password" />
+    <button onclick="doLogin()" class="btn primary">Login</button>
+    <p id="loginMsg" class="msg"></p>
+    <button onclick="skipLogin()" class="btn ghost">Guest হিসাবে ঢুকুন (Free)</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" class="screen">
+  <header class="topbar">
+    <div class="brand">ARAFAT OFFICE AL AI</div>
+    <div class="userbox">
+      <span id="userLabel">Guest</span>
+      <button onclick="logout()" class="btn small">Logout</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="prompt-card">
+      <label>আপনার Prompt লিখুন 👇</label>
+      <textarea id="promptInput" placeholder="যেমন: একটি Portfolio Website বানাও যেখানে About, Skills, Contact আছে..."></textarea>
+
+      <div class="row">
+        <select id="apiSelect">
+          <option value="gemini">Gemini API</option>
+          <option value="openai">OpenAI API</option>
+        </select>
+        <input id="apiKey" type="password" placeholder="API Key (নিজের)" />
+        <button onclick="generateCode()" class="btn primary">Generate</button>
+      </div>
+
+      <p id="quotaInfo" class="msg"></p>
+    </section>
+
+    <section class="output-card">
+      <div class="row between">
+        <h3>Generated Code</h3>
+        <div>
+          <button onclick="copyCode()" class="btn small">Copy</button>
+          <button onclick="downloadCode()" class="btn small">Download</button>
+          <button onclick="previewCode()" class="btn small">Preview</button>
+        </div>
+      </div>
+      <pre id="codeOutput">এখানে আপনার Generated Website / App এর কোড আসবে...</pre>
+    </section>
+
+    <section class="actions-card">
+      <a href="https://t.me/arafatsensitivity" target="_blank" class="btn telegram">📢 Telegram Channel</a>
+      <button onclick="installApp()" class="btn primary">⬇️ Download App</button>
+      <button id="premiumBtn" onclick="activatePremium()" class="btn gold">⭐ Premium Unlock</button>
+    </section>
+  </main>
+
+  <footer class="foot">
+    © ARAFAT OFFICE AL AI — Powered by Arafat
+  </footer>
+</div>
+
+<!-- PREVIEW MODAL -->
+<div id="previewModal" class="modal">
+  <div class="modal-inner">
+    <div class="row between">
+      <h3>Preview</h3>
+      <button onclick="closePreview()" class="btn small">✖</button>
+    </div>
+    <iframe id="previewFrame"></iframe>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
