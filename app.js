@@ -1,8 +1,8 @@
 // ================= CONFIG =================
 const ADMIN_EMAIL = "arafatsani16999@gmail.com";
-const ADMIN_PASS  = "arafat01875790164@@@@";
+const ADMIN_PASS  = "arafat01875790164@@";
 const PERMANENT_KEY = "iloveyoumababaff";
-const FREE_LIMIT = 6; // Free user কতবার generate করতে পারবে
+const FREE_LIMIT = 6;
 
 // ================= STATE =================
 let currentUser = JSON.parse(localStorage.getItem("aoa_user") || "null");
@@ -20,14 +20,12 @@ function doLogin(){
   const email = document.getElementById("loginEmail").value.trim();
   const pass  = document.getElementById("loginPass").value;
   const msg   = document.getElementById("loginMsg");
-
   if(email === ADMIN_EMAIL && pass === ADMIN_PASS){
     currentUser = { email, role:"admin", premium:true };
     localStorage.setItem("aoa_user", JSON.stringify(currentUser));
     enterApp();
   } else {
     msg.textContent = "❌ ভুল Email বা Password";
-    msg.classList.remove("ok");
   }
 }
 
@@ -50,6 +48,7 @@ function enterApp(){
     currentUser.role === "admin" ? "Admin 👑" : (currentUser.premium ? "Premium ⭐" : "Free");
   showScreen("mainApp");
   updateQuotaInfo();
+  loadSavedKey();  // ✅ সেভ করা Key লোড করবে
 }
 
 // ================= QUOTA =================
@@ -65,6 +64,41 @@ function updateQuotaInfo(){
     const left = FREE_LIMIT - getUsed();
     el.textContent = `Free: বাকি আছে ${left}/${FREE_LIMIT}`;
     el.className = left > 0 ? "msg ok" : "msg";
+  }
+}
+
+// ================= API KEY MANAGEMENT =================
+function toggleKeyView(){
+  const inp = document.getElementById("apiKey");
+  const btn = document.getElementById("eyeBtn");
+  if(inp.type === "password"){
+    inp.type = "text";
+    btn.textContent = "🙈";
+  } else {
+    inp.type = "password";
+    btn.textContent = "👁️";
+  }
+}
+
+function saveKey(key){
+  const remember = document.getElementById("rememberKey").checked;
+  if(remember){
+    localStorage.setItem("aoa_api_key", key);
+    localStorage.setItem("aoa_api_provider", document.getElementById("apiSelect").value);
+    document.getElementById("keyStatus").textContent = "✅ Key সেভ হয়েছে — পরের বার অটো লোড হবে";
+  } else {
+    localStorage.removeItem("aoa_api_key");
+    document.getElementById("keyStatus").textContent = "";
+  }
+}
+
+function loadSavedKey(){
+  const saved = localStorage.getItem("aoa_api_key");
+  const provider = localStorage.getItem("aoa_api_provider");
+  if(saved){
+    document.getElementById("apiKey").value = saved;
+    if(provider) document.getElementById("apiSelect").value = provider;
+    document.getElementById("keyStatus").textContent = "✅ সেভ করা Key লোড হয়েছে";
   }
 }
 
@@ -90,25 +124,22 @@ async function generateCode(){
   const output = document.getElementById("codeOutput");
 
   if(!promptText){ alert("Prompt লিখুন!"); return; }
-  if(!apiKey){ alert("API Key দিন (Gemini বা OpenAI)"); return; }
+  if(!apiKey){ alert("API Key দিন — উপরে 🔑 Free Gemini API Key নিন বাটনে ক্লিক করুন"); return; }
+
+  // Key সেভ করো
+  saveKey(apiKey);
 
   // Quota check
   if(!currentUser.premium && currentUser.role !== "admin"){
-    if(getUsed() >= FREE_LIMIT){
-      alert("Free limit শেষ! Premium Unlock করুন।");
-      return;
-    }
+    if(getUsed() >= FREE_LIMIT){ alert("Free limit শেষ! Premium Unlock করুন।"); return; }
   }
 
   output.textContent = "⏳ AI ভাবছে... একটু অপেক্ষা করুন...";
 
   try {
     let code = "";
-    if(provider === "gemini"){
-      code = await callGemini(apiKey, promptText);
-    } else {
-      code = await callOpenAI(apiKey, promptText);
-    }
+    if(provider === "gemini") code = await callGemini(apiKey, promptText);
+    else code = await callOpenAI(apiKey, promptText);
     output.textContent = code;
 
     if(!currentUser.premium && currentUser.role !== "admin"){
@@ -123,15 +154,10 @@ async function generateCode(){
 // ---- Gemini ----
 async function callGemini(apiKey, promptText){
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-  const body = {
-    contents: [{
-      parts: [{ text: buildSystemPrompt(promptText) }]
-    }]
-  };
   const res = await fetch(url, {
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body: JSON.stringify(body)
+    body: JSON.stringify({ contents: [{ parts: [{ text: buildSystemPrompt(promptText) }] }] })
   });
   const data = await res.json();
   if(!res.ok) throw new Error(data.error?.message || "Gemini API Error");
@@ -142,10 +168,7 @@ async function callGemini(apiKey, promptText){
 async function callOpenAI(apiKey, promptText){
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer "+apiKey
-    },
+    headers:{ "Content-Type":"application/json", "Authorization":"Bearer "+apiKey },
     body: JSON.stringify({
       model:"gpt-4o-mini",
       messages:[
@@ -160,11 +183,7 @@ async function callOpenAI(apiKey, promptText){
 }
 
 function buildSystemPrompt(userPrompt){
-  return `তুমি একজন Expert Web Developer। নিচের চাহিদা অনুযায়ী একটি সম্পূর্ণ HTML File বানাও (CSS ও JS একই ফাইলে inline থাকবে)। শুধু কোড দাও, কোনো ব্যাখ্যা না।
-
-User Request: ${userPrompt}
-
-Output: একটি সম্পূর্ণ <!DOCTYPE html> ... </html> ফাইল।`;
+  return `তুমি একজন Expert Web Developer। নিচের চাহিদা অনুযায়ী একটি সম্পূর্ণ HTML File বানাও (CSS ও JS একই ফাইলে inline থাকবে)। শুধু কোড দাও, কোনো ব্যাখ্যা না।\n\nUser Request: ${userPrompt}\n\nOutput: একটি সম্পূর্ণ <!DOCTYPE html> ... </html> ফাইল।`;
 }
 
 // ================= UTILS =================
@@ -191,7 +210,7 @@ function closePreview(){
   document.getElementById("previewModal").classList.remove("open");
 }
 
-// ================= PWA INSTALL =================
+// ================= PWA =================
 window.addEventListener("beforeinstallprompt", e => {
   e.preventDefault();
   deferredPrompt = e;
@@ -205,13 +224,13 @@ function installApp(){
       deferredPrompt = null;
     });
   } else {
-    alert("ℹ️ আপনার ব্রাউজার থেকে মেনু → 'Add to Home Screen' চাপুন।");
+    alert("ℹ️ ব্রাউজার মেনু → 'Add to Home Screen' চাপুন।");
   }
 }
 
 // ================= SERVICE WORKER =================
 if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("sw.js");
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
 }
 
 // ================= INIT =================
