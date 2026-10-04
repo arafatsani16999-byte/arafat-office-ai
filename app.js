@@ -2,7 +2,7 @@
 const ADMIN_EMAIL = "arafatsani16999@gmail.com";
 const ADMIN_PASS  = "arafat01875790164@@";
 const PERMANENT_KEY = "iloveyoumababaff";
-const FREE_LIMIT = 5; // Free user কতবার generate করতে পারবে
+const FREE_LIMIT = 6; // Free user কতবার generate করতে পারবে
 
 // ================= STATE =================
 let currentUser = JSON.parse(localStorage.getItem("aoa_user") || "null");
