@@ -1,7 +1,7 @@
 // ================= CONFIG =================
 const ADMIN_EMAIL = "arafatsani16999@gmail.com";
-const ADMIN_PASS  = "arafat01875790164@@";
-const PERMANENT_KEY = "iloveyoumababaff";
+const ADMIN_PASS  = "arafat123";
+const PERMANENT_KEY = "premium123";
 const FREE_LIMIT = 6;
 
 // ================= STATE =================
@@ -48,7 +48,7 @@ function enterApp(){
     currentUser.role === "admin" ? "Admin 👑" : (currentUser.premium ? "Premium ⭐" : "Free");
   showScreen("mainApp");
   updateQuotaInfo();
-  loadSavedKey();  // ✅ সেভ করা Key লোড করবে
+  loadSavedKey();
 }
 
 // ================= QUOTA =================
@@ -85,7 +85,7 @@ function saveKey(key){
   if(remember){
     localStorage.setItem("aoa_api_key", key);
     localStorage.setItem("aoa_api_provider", document.getElementById("apiSelect").value);
-    document.getElementById("keyStatus").textContent = "✅ Key সেভ হয়েছে — পরের বার অটো লোড হবে";
+    document.getElementById("keyStatus").textContent = "✅ Key সেভ হয়েছে";
   } else {
     localStorage.removeItem("aoa_api_key");
     document.getElementById("keyStatus").textContent = "";
@@ -124,12 +124,10 @@ async function generateCode(){
   const output = document.getElementById("codeOutput");
 
   if(!promptText){ alert("Prompt লিখুন!"); return; }
-  if(!apiKey){ alert("API Key দিন — উপরে 🔑 Free Gemini API Key নিন বাটনে ক্লিক করুন"); return; }
+  if(!apiKey){ alert("API Key দিন"); return; }
 
-  // Key সেভ করো
   saveKey(apiKey);
 
-  // Quota check
   if(!currentUser.premium && currentUser.role !== "admin"){
     if(getUsed() >= FREE_LIMIT){ alert("Free limit শেষ! Premium Unlock করুন।"); return; }
   }
@@ -151,17 +149,39 @@ async function generateCode(){
   }
 }
 
-// ---- Gemini ----
+// ---- Gemini (Multi-Model Auto Try) ----
 async function callGemini(apiKey, promptText){
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
-  const res = await fetch(url, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({ contents: [{ parts: [{ text: buildSystemPrompt(promptText) }] }] })
-  });
-  const data = await res.json();
-  if(!res.ok) throw new Error(data.error?.message || "Gemini API Error");
-  return data.candidates[0].content.parts[0].text;
+  const models = [
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-2.0-flash-exp",
+    "gemini-flash-latest",
+    "gemini-1.5-flash-latest",
+    "gemini-pro"
+  ];
+
+  let lastError = "";
+
+  for(const model of models){
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const res = await fetch(url, {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ contents: [{ parts: [{ text: buildSystemPrompt(promptText) }] }] })
+      });
+      const data = await res.json();
+
+      if(res.ok && data.candidates && data.candidates[0]){
+        return data.candidates[0].content.parts[0].text;
+      }
+      lastError = data.error?.message || "Error";
+    } catch(e){
+      lastError = e.message;
+    }
+  }
+
+  throw new Error("সব Model Fail। শেষ Error: " + lastError);
 }
 
 // ---- OpenAI ----
